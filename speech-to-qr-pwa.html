@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4F46E5">
+  <meta name="description" content="Optag tale og konverter til QR-kode">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tale til QR">
+  <title>Tale til QR-kode</title>
+  <link rel="manifest" id="manifest-placeholder">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%234F46E5'/><text x='50' y='65' font-size='60' text-anchor='middle' fill='white'>🎤</text></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      padding: 30px;
+    }
+    
+    h1 {
+      font-size: 28px;
+      color: #1f2937;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .subtitle {
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    
+    .install-prompt {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border: 2px solid #93c5fd;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .install-btn {
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      transition: all 0.3s;
+    }
+    
+    .install-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    }
+    
+    .input-group {
+      margin-bottom: 24px;
+    }
+    
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #4F46E5;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+    
+    .hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+    
+    .hint a {
+      color: #4F46E5;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .record-section {
+      text-align: center;
+      margin: 40px 0;
+    }
+    
+    .record-btn {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: none;
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.3s;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    
+    .record-btn:disabled {
+      background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .record-btn.start {
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    }
+    
+    .record-btn.start:not(:disabled):hover {
+      transform: scale(1.08);
+      box-shadow: 0 15px 40px rgba(79, 70, 229, 0.4);
+    }
+    
+    .record-btn.stop {
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); box-shadow: 0 15px 40px rgba(239, 68, 68, 0.5); }
+    }
+    
+    .icon {
+      font-size: 48px;
+    }
+    
+    .status {
+      text-align: center;
+      color: #4b5563;
+      margin: 20px 0;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    
+    .alert {
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .alert.error {
+      background: #fee2e2;
+      border: 2px solid #fecaca;
+      color: #991b1b;
+    }
+    
+    .transcription-box {
+      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .transcription-box h2 {
+      font-size: 16px;
+      color: #374151;
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+    
+    .transcription-box p {
+      color: #1f2937;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+    
+    .qr-section {
+      text-align: center;
+      margin-top: 24px;
+    }
+    
+    .qr-section h2 {
+      font-size: 18px;
+      color: #374151;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+    
+    .qr-container {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      display: inline-block;
+    }
+    
+    .qr-container img {
+      width: 280px;
+      height: 280px;
+      display: block;
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 24px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .record-btn {
+        width: 140px;
+        height: 140px;
+      }
+      
+      .icon {
+        font-size: 40px;
+      }
+      
+      .qr-container img {
+        width: 240px;
+        height: 240px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      <span style="font-size: 32px;">🎤</span>
+      Tale til QR
+    </h1>
+    <p class="subtitle">Optag tale og få en QR-kode</p>
+    
+    <div id="installPrompt" class="install-prompt" style="display: none;">
+      <p style="margin-bottom: 4px; font-weight: 700; font-size: 15px;">📱 Installer appen</p>
+      <p style="font-size: 13px; color: #6b7280;">Gem til hjemmeskærmen for hurtig adgang</p>
+      <button id="installBtn" class="install-btn">Installer nu</button>
+    </div>
+    
+    <div class="input-group">
+      <label for="apiKey">Deepgram API-nøgle</label>
+      <input type="password" id="apiKey" placeholder="Indtast din API-nøgle">
+      <p class="hint">Få din API-nøgle på <a href="https://console.deepgram.com/" target="_blank">console.deepgram.com</a></p>
+    </div>
+    
+    <div class="record-section">
+      <button id="recordBtn" class="record-btn start" disabled>
+        <div class="icon">🎙️</div>
+        <span style="font-size: 16px;">Start</span>
+      </button>
+    </div>
+    
+    <div id="status" class="status"></div>
+    <div id="alert"></div>
+    <div id="transcription"></div>
+    <div id="qrCode"></div>
+  </div>
+
+  <script>
+    var manifest = {
+      name: "Tale til QR-kode",
+      short_name: "Tale2QR",
+      description: "Optag tale og konverter til QR-kode",
+      start_url: "./",
+      display: "standalone",
+      background_color: "#ffffff",
+      theme_color: "#4F46E5",
+      icons: [
+        {
+          src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%234F46E5'/><text x='50' y='65' font-size='60' text-anchor='middle' fill='white'>🎤</text></svg>",
+          sizes: "192x192",
+          type: "image/svg+xml"
+        },
+        {
+          src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%234F46E5'/><text x='50' y='65' font-size='60' text-anchor='middle' fill='white'>🎤</text></svg>",
+          sizes: "512x512",
+          type: "image/svg+xml"
+        }
+      ]
+    };
+
+    var manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+    var manifestURL = URL.createObjectURL(manifestBlob);
+    document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
+
+    var deferredPrompt;
+    var mediaRecorder;
+    var audioChunks = [];
+    var isRecording = false;
+
+    var DEEPGRAM_API_KEY = 'c339f6e4e04763b37452647336a9a6bb2182bfbb';
+    
+    var apiKeyInput = document.getElementById('apiKey');
+    var recordBtn = document.getElementById('recordBtn');
+    var statusDiv = document.getElementById('status');
+    var alertDiv = document.getElementById('alert');
+    var transcriptionDiv = document.getElementById('transcription');
+    var qrCodeDiv = document.getElementById('qrCode');
+    var installPrompt = document.getElementById('installPrompt');
+    var installBtn = document.getElementById('installBtn');
+
+    apiKeyInput.value = DEEPGRAM_API_KEY;
+    recordBtn.disabled = false;
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      installPrompt.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(result) {
+          if (result.outcome === 'accepted') {
+            installPrompt.style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      }
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        var swCode = 'self.addEventListener("install", function(e) { self.skipWaiting(); }); self.addEventListener("activate", function(e) { self.clients.claim(); }); self.addEventListener("fetch", function(e) { e.respondWith(fetch(e.request)); });';
+        var blob = new Blob([swCode], {type: 'application/javascript'});
+        var url = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(url);
+      });
+    }
+
+    recordBtn.addEventListener('click', function() {
+      if (!isRecording) {
+        startRecording();
+      } else {
+        stopRecording();
+      }
+    });
+
+    function startRecording() {
+      alertDiv.innerHTML = '';
+      transcriptionDiv.innerHTML = '';
+      qrCodeDiv.innerHTML = '';
+      
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = function(event) {
+            audioChunks.push(event.data);
+          };
+
+          mediaRecorder.onstop = function() {
+            var audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            transcribeAudio(audioBlob);
+            stream.getTracks().forEach(function(track) {
+              track.stop();
+            });
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+          updateRecordButton();
+          statusDiv.innerHTML = '<span style="color: #EF4444;">🔴 Optager...</span>';
+        })
+        .catch(function(err) {
+          showAlert('Kunne ikke få adgang til mikrofon: ' + err.message, 'error');
+        });
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        updateRecordButton();
+        statusDiv.textContent = '⏳ Behandler...';
+      }
+    }
+
+    function updateRecordButton() {
+      var iconEl = recordBtn.querySelector('.icon');
+      var textEl = recordBtn.querySelector('span');
+      
+      if (isRecording) {
+        recordBtn.className = 'record-btn stop';
+        textEl.textContent = 'Stop';
+        iconEl.textContent = '⏹️';
+      } else {
+        recordBtn.className = 'record-btn start';
+        textEl.textContent = 'Start';
+        iconEl.textContent = '🎙️';
+      }
+    }
+
+    function transcribeAudio(audioBlob) {
+      var apiKey = apiKeyInput.value.trim();
+      if (!apiKey) {
+        showAlert('Indtast venligst din Deepgram API-nøgle', 'error');
+        statusDiv.textContent = '';
+        return;
+      }
+
+      fetch('https://api.deepgram.com/v1/listen?language=da', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Token ' + apiKey,
+          'Content-Type': 'audio/webm'
+        },
+        body: audioBlob
+      })
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error('Deepgram API fejl: ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(function(data) {
+        var text = '';
+        if (data.results && data.results.channels && data.results.channels[0] && 
+            data.results.channels[0].alternatives && data.results.channels[0].alternatives[0]) {
+          text = data.results.channels[0].alternatives[0].transcript || '';
+        }
+        
+        if (!text) {
+          showAlert('Ingen tale detekteret', 'error');
+          statusDiv.textContent = '';
+          return;
+        }
+
+        showTranscription(text);
+        generateQRCode(text);
+        statusDiv.innerHTML = '<span style="color: #059669;">✅ Færdig!</span>';
+        setTimeout(function() {
+          statusDiv.textContent = '';
+        }, 3000);
+      })
+      .catch(function(err) {
+        showAlert('Fejl ved transkribering: ' + err.message, 'error');
+        statusDiv.textContent = '';
+      });
+    }
+
+    function showAlert(message, type) {
+      alertDiv.innerHTML = '<div class="alert ' + type + '">' + message + '</div>';
+    }
+
+    function showTranscription(text) {
+      transcriptionDiv.innerHTML = '<div class="transcription-box"><h2>📝 Transskription:</h2><p>' + text + '</p></div>';
+    }
+
+    function generateQRCode(text) {
+      var encodedText = encodeURIComponent(text);
+      var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodedText;
+      
+      qrCodeDiv.innerHTML = '<div class="qr-section"><h2>📱 QR-kode</h2><div class="qr-container"><img src="' + qrUrl + '" alt="QR Code"></div><p style="margin-top: 16px; color: #6b7280; font-size: 13px;">Scan for at se teksten</p></div>';
+    }
+  </script>
+</body>
+</html>
