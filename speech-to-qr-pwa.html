@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Medicinsk diktering med QR-kode">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Medicinsk Diktering">
+  <title>Medicinsk Diktering - QR</title>
+  <link rel="manifest" id="manifest-placeholder">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f172a'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='%2306b6d4'>+</text></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0e1a;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e2e8f0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 20% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+      animation: pulse 15s ease-in-out infinite;
+      pointer-events: none;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.1) rotate(5deg); }
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+                  0 0 0 1px rgba(6, 182, 212, 0.1),
+                  inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+      padding: 32px;
+      border: 1px solid rgba(51, 65, 85, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header {
+      border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, #06b6d4 0%, transparent 100%);
+    }
+    
+    h1 {
+      font-size: 28px;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 400;
+    }
+    
+    .gdpr-notice {
+      display: none;
+    }
+    
+    .install-prompt {
+      background: #1e3a8a;
+      border: 1px solid #3b82f6;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    
+    .install-btn {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+    
+    .install-btn:hover {
+      background: #2563eb;
+    }
+    
+    .record-section {
+      text-align: center;
+      margin: 40px 0;
+      padding: 32px 0;
+      position: relative;
+    }
+    
+    .record-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, #06b6d4 50%, transparent 100%);
+    }
+    
+    .record-section::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, #8b5cf6 50%, transparent 100%);
+    }
+    
+    .record-btn {
+      width: 140px;
+      height: 140px;
+      border-radius: 24px;
+      border: 2px solid rgba(6, 182, 212, 0.3);
+      font-size: 14px;
+      font-weight: 600;
+      color: #f1f5f9;
+      cursor: pointer;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(10px);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .record-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      padding: 2px;
+      background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .record-btn:disabled {
+      background: rgba(30, 41, 59, 0.4);
+      border-color: rgba(51, 65, 85, 0.3);
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    
+    .record-btn.start:not(:disabled):hover {
+      transform: translateY(-4px) scale(1.05);
+      border-color: #06b6d4;
+      box-shadow: 0 20px 40px -10px rgba(6, 182, 212, 0.4),
+                  0 0 60px rgba(6, 182, 212, 0.2);
+    }
+    
+    .record-btn.start:not(:disabled):hover::before {
+      opacity: 1;
+    }
+    
+    .record-btn.stop {
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(185, 28, 28, 0.3));
+      border-color: #ef4444;
+      animation: recordPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes recordPulse {
+      0%, 100% { 
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+      }
+      50% { 
+        box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
+      }
+    }
+    
+    .record-btn.stop:hover {
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.3), rgba(185, 28, 28, 0.4));
+    }
+    
+    .icon {
+      font-size: 42px;
+      filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.5));
+    }
+    
+    .status {
+      text-align: center;
+      color: #94a3b8;
+      margin: 16px 0;
+      font-size: 13px;
+      font-weight: 500;
+      min-height: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid;
+    }
+    
+    .alert.error {
+      background: #7f1d1d;
+      border-color: #dc2626;
+      color: #fca5a5;
+    }
+    
+    .transcription-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .transcription-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, #06b6d4 50%, transparent 100%);
+    }
+    
+    .transcription-box h2 {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .transcription-box p {
+      color: #e2e8f0;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    
+    .qr-section {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 32px;
+      position: relative;
+    }
+    
+    .qr-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, #8b5cf6 50%, transparent 100%);
+    }
+    
+    .qr-section h2 {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 20px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    .qr-container {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      display: inline-block;
+      border: 2px solid rgba(139, 92, 246, 0.3);
+      box-shadow: 0 20px 40px -10px rgba(139, 92, 246, 0.3),
+                  0 0 0 1px rgba(139, 92, 246, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .qr-container:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 30px 60px -10px rgba(139, 92, 246, 0.4),
+                  0 0 0 1px rgba(139, 92, 246, 0.2);
+    }
+    
+    .qr-container canvas {
+      display: block;
+    }
+    
+    .qr-info {
+      margin-top: 12px;
+      color: #64748b;
+      font-size: 12px;
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 24px;
+      }
+      
+      h1 {
+        font-size: 20px;
+      }
+      
+      .record-btn {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .icon {
+        font-size: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Medicinsk Diktering</h1>
+      <p class="subtitle">Sikker tale-til-tekst med QR-kode output</p>
+    </div>
+    
+
+    
+    <div id="installPrompt" class="install-prompt" style="display: none;">
+      <p style="margin-bottom: 4px; font-weight: 600; font-size: 14px;">Installer applikation</p>
+      <p style="font-size: 12px; color: #93c5fd; margin-bottom: 8px;">Tilføj til hjemmeskærm for offline adgang</p>
+      <button id="installBtn" class="install-btn">Installer</button>
+    </div>
+    
+    <div class="record-section">
+      <button id="recordBtn" class="record-btn start">
+        <div class="icon">⏺</div>
+        <span style="font-size: 11px;">Start</span>
+      </button>
+    </div>
+    
+    <div id="status" class="status"></div>
+    <div id="alert"></div>
+    <div id="transcription"></div>
+    <div id="qrCode"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    var manifest = {
+      name: "Medicinsk Diktering",
+      short_name: "MedDikt",
+      description: "Sikker medicinsk diktering med QR-kode",
+      start_url: "./",
+      display: "standalone",
+      background_color: "#0f172a",
+      theme_color: "#0f172a",
+      icons: [
+        {
+          src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f172a'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='%2306b6d4'>+</text></svg>",
+          sizes: "192x192",
+          type: "image/svg+xml"
+        }
+      ]
+    };
+
+    var manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+    var manifestURL = URL.createObjectURL(manifestBlob);
+    document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
+
+    var CORTI_CLIENT_ID = 'patrick-jepsen-default_client';
+    var CORTI_CLIENT_SECRET = 'yHMXk5SN5HK2Ht4aDBQufcE9S4CuwH4g';
+    var CORTI_TENANT = 'base';
+    
+    var deferredPrompt;
+    var mediaRecorder;
+    var audioContext;
+    var websocket;
+    var isRecording = false;
+    var fullTranscription = '';
+
+    var recordBtn = document.getElementById('recordBtn');
+    var statusDiv = document.getElementById('status');
+    var alertDiv = document.getElementById('alert');
+    var transcriptionDiv = document.getElementById('transcription');
+    var qrCodeDiv = document.getElementById('qrCode');
+    var installPrompt = document.getElementById('installPrompt');
+    var installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      installPrompt.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(result) {
+          if (result.outcome === 'accepted') {
+            installPrompt.style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      }
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        var swCode = 'self.addEventListener("install", function(e) { self.skipWaiting(); }); self.addEventListener("activate", function(e) { self.clients.claim(); }); self.addEventListener("fetch", function(e) { e.respondWith(fetch(e.request)); });';
+        var blob = new Blob([swCode], {type: 'application/javascript'});
+        var url = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(url);
+      });
+    }
+
+    recordBtn.addEventListener('click', function() {
+      if (!isRecording) {
+        startRecording();
+      } else {
+        stopRecording();
+      }
+    });
+
+    function getAccessToken() {
+      statusDiv.textContent = 'Autentificerer...';
+      
+      var credentials = btoa(CORTI_CLIENT_ID + ':' + CORTI_CLIENT_SECRET);
+      
+      return fetch('https://auth.eu.corti.ai/oauth2/token', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Basic ' + credentials,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'grant_type=client_credentials&scope=api'
+      })
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error('Authentication fejlede: ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(function(data) {
+        return data.access_token;
+      });
+    }
+
+    function createInteraction(accessToken) {
+      statusDiv.textContent = 'Etablerer forbindelse...';
+      
+      return fetch('https://api.eu.corti.ai/dictation/v2/interactions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + accessToken,
+          'Content-Type': 'application/json',
+          'X-Tenant-Name': CORTI_TENANT
+        },
+        body: JSON.stringify({
+          language: 'da-DK',
+          sample_rate: 16000
+        })
+      })
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error('Kunne ikke oprette session: ' + response.statusText);
+        }
+        return response.json();
+      });
+    }
+
+    function startRecording() {
+      alertDiv.innerHTML = '';
+      transcriptionDiv.innerHTML = '';
+      qrCodeDiv.innerHTML = '';
+      fullTranscription = '';
+      
+      getAccessToken()
+        .then(function(token) {
+          return createInteraction(token);
+        })
+        .then(function(interaction) {
+          return connectWebSocket(interaction.websocket_url);
+        })
+        .catch(function(err) {
+          showAlert('Systemfejl: ' + err.message, 'error');
+          statusDiv.textContent = '';
+        });
+    }
+
+    function connectWebSocket(wsUrl) {
+      statusDiv.textContent = 'Klar til optagelse';
+      
+      websocket = new WebSocket(wsUrl);
+      
+      websocket.onopen = function() {
+        startAudioCapture();
+      };
+      
+      websocket.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        
+        if (data.type === 'transcript') {
+          if (data.is_final) {
+            fullTranscription += data.text + ' ';
+            updateTranscription();
+          }
+        }
+      };
+      
+      websocket.onerror = function(error) {
+        showAlert('Forbindelsesfejl: Kunne ikke oprette forbindelse', 'error');
+        stopRecording();
+      };
+      
+      websocket.onclose = function() {
+        if (isRecording) {
+          stopRecording();
+        }
+      };
+    }
+
+    function startAudioCapture() {
+      navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          sampleRate: 16000,
+          channelCount: 1,
+          echoCancellation: true,
+          noiseSuppression: true
+        } 
+      })
+      .then(function(stream) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+        var source = audioContext.createMediaStreamSource(stream);
+        var processor = audioContext.createScriptProcessor(4096, 1, 1);
+        
+        processor.onaudioprocess = function(e) {
+          if (websocket && websocket.readyState === WebSocket.OPEN) {
+            var inputData = e.inputBuffer.getChannelData(0);
+            var pcmData = new Int16Array(inputData.length);
+            
+            for (var i = 0; i < inputData.length; i++) {
+              var s = Math.max(-1, Math.min(1, inputData[i]));
+              pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+            
+            websocket.send(pcmData.buffer);
+          }
+        };
+        
+        source.connect(processor);
+        processor.connect(audioContext.destination);
+        
+        mediaRecorder = { stream: stream, processor: processor, source: source };
+        isRecording = true;
+        updateRecordButton();
+        statusDiv.textContent = '● Optager';
+      })
+      .catch(function(err) {
+        showAlert('Mikrofon adgang nægtet: ' + err.message, 'error');
+        if (websocket) websocket.close();
+      });
+    }
+
+    function stopRecording() {
+      if (mediaRecorder) {
+        mediaRecorder.stream.getTracks().forEach(function(track) {
+          track.stop();
+        });
+        mediaRecorder.processor.disconnect();
+        mediaRecorder.source.disconnect();
+        mediaRecorder = null;
+      }
+      
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+      
+      if (websocket) {
+        websocket.close();
+        websocket = null;
+      }
+      
+      isRecording = false;
+      updateRecordButton();
+      
+      if (fullTranscription.trim()) {
+        generateQRCode(fullTranscription.trim());
+        statusDiv.textContent = 'Session afsluttet';
+        setTimeout(function() {
+          statusDiv.textContent = '';
+        }, 3000);
+      } else {
+        statusDiv.textContent = '';
+      }
+    }
+
+    function updateRecordButton() {
+      var iconEl = recordBtn.querySelector('.icon');
+      var textEl = recordBtn.querySelector('span');
+      
+      if (isRecording) {
+        recordBtn.className = 'record-btn stop';
+        textEl.textContent = 'Stop';
+        iconEl.textContent = '⏹';
+      } else {
+        recordBtn.className = 'record-btn start';
+        textEl.textContent = 'Start';
+        iconEl.textContent = '⏺';
+      }
+    }
+
+    function updateTranscription() {
+      if (fullTranscription.trim()) {
+        transcriptionDiv.innerHTML = '<div class="transcription-box"><h2>Transskription</h2><p>' + fullTranscription + '</p></div>';
+      }
+    }
+
+    function showAlert(message, type) {
+      alertDiv.innerHTML = '<div class="alert ' + type + '">' + message + '</div>';
+    }
+
+    function generateQRCode(text) {
+      qrCodeDiv.innerHTML = '<div class="qr-section"><h2>QR-kode Output</h2><div id="qrcode" class="qr-container"></div><p class="qr-info">Genereret lokalt - ingen data transmitteret</p></div>';
+      
+      new QRCode(document.getElementById('qrcode'), {
+        text: text,
+        width: 256,
+        height: 256,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+  </script>
+</body>
+</html>
