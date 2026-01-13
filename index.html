@@ -100,34 +100,61 @@
       font-weight: 400;
     }
     
-    .gdpr-notice {
-      display: none;
-    }
-    
-    .install-prompt {
-      background: #1e3a8a;
-      border: 1px solid #3b82f6;
-      border-radius: 8px;
-      padding: 16px;
+    .auth-section {
       margin-bottom: 24px;
       text-align: center;
     }
     
-    .install-btn {
-      background: #3b82f6;
+    .login-btn {
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
       color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 500;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
-      margin-top: 8px;
-      transition: all 0.2s;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      box-shadow: 0 10px 25px rgba(6, 182, 212, 0.3);
     }
     
-    .install-btn:hover {
-      background: #2563eb;
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(6, 182, 212, 0.4);
+    }
+    
+    .logout-btn {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .logout-btn:hover {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: rgba(239, 68, 68, 0.5);
+    }
+    
+    .user-info {
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #a5f3fc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     
     .record-section {
@@ -229,10 +256,6 @@
       }
     }
     
-    .record-btn.stop:hover {
-      background: linear-gradient(135deg, rgba(220, 38, 38, 0.3), rgba(185, 28, 28, 0.4));
-    }
-    
     .icon {
       font-size: 42px;
       filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.5));
@@ -251,16 +274,17 @@
     
     .alert {
       padding: 12px 16px;
-      border-radius: 8px;
+      border-radius: 12px;
       margin-bottom: 20px;
       font-size: 13px;
       font-weight: 500;
       border: 1px solid;
+      backdrop-filter: blur(10px);
     }
     
     .alert.error {
-      background: #7f1d1d;
-      border-color: #dc2626;
+      background: rgba(127, 29, 29, 0.3);
+      border-color: rgba(220, 38, 38, 0.5);
       color: #fca5a5;
     }
     
@@ -296,8 +320,8 @@
     
     .transcription-box p {
       color: #e2e8f0;
-      line-height: 1.6;
-      font-size: 14px;
+      line-height: 1.7;
+      font-size: 15px;
     }
     
     .qr-section {
@@ -360,16 +384,16 @@
       }
       
       h1 {
-        font-size: 20px;
+        font-size: 24px;
       }
       
       .record-btn {
-        width: 100px;
-        height: 100px;
+        width: 120px;
+        height: 120px;
       }
       
       .icon {
-        font-size: 30px;
+        font-size: 36px;
       }
     }
   </style>
@@ -381,16 +405,17 @@
       <p class="subtitle">Sikker tale-til-tekst med QR-kode output</p>
     </div>
     
-
+    <div id="authSection" class="auth-section">
+      <button id="loginBtn" class="login-btn">Log ind med Corti</button>
+    </div>
     
-    <div id="installPrompt" class="install-prompt" style="display: none;">
-      <p style="margin-bottom: 4px; font-weight: 600; font-size: 14px;">Installer applikation</p>
-      <p style="font-size: 12px; color: #93c5fd; margin-bottom: 8px;">Tilføj til hjemmeskærm for offline adgang</p>
-      <button id="installBtn" class="install-btn">Installer</button>
+    <div id="userInfo" style="display: none;" class="user-info">
+      <span>✓ Godkendt</span>
+      <button id="logoutBtn" class="logout-btn">Log ud</button>
     </div>
     
     <div class="record-section">
-      <button id="recordBtn" class="record-btn start">
+      <button id="recordBtn" class="record-btn start" disabled>
         <div class="icon">⏺</div>
         <span style="font-size: 11px;">Start</span>
       </button>
@@ -404,71 +429,146 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
-    var manifest = {
-      name: "Medicinsk Diktering",
-      short_name: "MedDikt",
-      description: "Sikker medicinsk diktering med QR-kode",
-      start_url: "./",
-      display: "standalone",
-      background_color: "#0f172a",
-      theme_color: "#0f172a",
-      icons: [
-        {
-          src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230f172a'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='%2306b6d4'>+</text></svg>",
-          sizes: "192x192",
-          type: "image/svg+xml"
-        }
-      ]
-    };
-
-    var manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-    var manifestURL = URL.createObjectURL(manifestBlob);
-    document.getElementById('manifest-placeholder').setAttribute('href', manifestURL);
-
-    var CORTI_CLIENT_ID = 'patrick-jepsen-default_client';
-    var CORTI_CLIENT_SECRET = 'yHMXk5SN5HK2Ht4aDBQufcE9S4CuwH4g';
-    var CORTI_TENANT = 'base';
+    var CORTI_CLIENT_ID = 'patrick-jepsen-ppj';
+    var CORTI_AUTH_URL = 'https://auth.eu.corti.ai/oauth2/authorize';
+    var CORTI_TOKEN_URL = 'https://auth.eu.corti.ai/oauth2/token';
+    var REDIRECT_URI = 'https://lukasarcher.github.io/';
     
-    var deferredPrompt;
     var mediaRecorder;
     var audioContext;
     var websocket;
     var isRecording = false;
     var fullTranscription = '';
+    var accessToken = null;
 
+    var loginBtn = document.getElementById('loginBtn');
+    var logoutBtn = document.getElementById('logoutBtn');
+    var authSection = document.getElementById('authSection');
+    var userInfo = document.getElementById('userInfo');
     var recordBtn = document.getElementById('recordBtn');
     var statusDiv = document.getElementById('status');
     var alertDiv = document.getElementById('alert');
     var transcriptionDiv = document.getElementById('transcription');
     var qrCodeDiv = document.getElementById('qrCode');
-    var installPrompt = document.getElementById('installPrompt');
-    var installBtn = document.getElementById('installBtn');
 
-    window.addEventListener('beforeinstallprompt', function(e) {
-      e.preventDefault();
-      deferredPrompt = e;
-      installPrompt.style.display = 'block';
+    function generateRandomString(length) {
+      var array = new Uint8Array(length);
+      window.crypto.getRandomValues(array);
+      var result = '';
+      for (var i = 0; i < array.length; i++) {
+        var hex = array[i].toString(16);
+        result += hex.length === 1 ? '0' + hex : hex;
+      }
+      return result;
+    }
+
+    function base64URLEncode(buffer) {
+      var bytes = new Uint8Array(buffer);
+      var binary = '';
+      for (var i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+    }
+
+    function sha256(plain) {
+      var encoder = new TextEncoder();
+      var data = encoder.encode(plain);
+      return window.crypto.subtle.digest('SHA-256', data);
+    }
+
+    loginBtn.addEventListener('click', function() {
+      var codeVerifier = generateRandomString(64);
+      localStorage.setItem('code_verifier', codeVerifier);
+      
+      sha256(codeVerifier).then(function(hashed) {
+        var codeChallenge = base64URLEncode(hashed);
+        
+        var params = new URLSearchParams({
+          client_id: CORTI_CLIENT_ID,
+          response_type: 'code',
+          redirect_uri: REDIRECT_URI,
+          code_challenge: codeChallenge,
+          code_challenge_method: 'S256',
+          scope: 'api'
+        });
+        
+        window.location.href = CORTI_AUTH_URL + '?' + params.toString();
+      });
     });
 
-    installBtn.addEventListener('click', function() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(function(result) {
-          if (result.outcome === 'accepted') {
-            installPrompt.style.display = 'none';
+    logoutBtn.addEventListener('click', function() {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('code_verifier');
+      accessToken = null;
+      updateUI();
+    });
+
+    function handleCallback() {
+      var urlParams = new URLSearchParams(window.location.search);
+      var code = urlParams.get('code');
+      
+      if (code) {
+        var codeVerifier = localStorage.getItem('code_verifier');
+        
+        if (!codeVerifier) {
+          showAlert('Fejl: Ingen code verifier fundet', 'error');
+          return;
+        }
+        
+        var body = new URLSearchParams({
+          grant_type: 'authorization_code',
+          client_id: CORTI_CLIENT_ID,
+          code: code,
+          redirect_uri: REDIRECT_URI,
+          code_verifier: codeVerifier
+        });
+        
+        fetch(CORTI_TOKEN_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: body.toString()
+        })
+        .then(function(response) {
+          if (!response.ok) {
+            return response.text().then(function(text) {
+              throw new Error('Token exchange fejlede: ' + text);
+            });
           }
-          deferredPrompt = null;
+          return response.json();
+        })
+        .then(function(data) {
+          accessToken = data.access_token;
+          localStorage.setItem('access_token', accessToken);
+          localStorage.removeItem('code_verifier');
+          
+          window.history.replaceState({}, document.title, REDIRECT_URI);
+          updateUI();
+        })
+        .catch(function(err) {
+          showAlert('Login fejl: ' + err.message, 'error');
+          console.error(err);
         });
       }
-    });
+    }
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        var swCode = 'self.addEventListener("install", function(e) { self.skipWaiting(); }); self.addEventListener("activate", function(e) { self.clients.claim(); }); self.addEventListener("fetch", function(e) { e.respondWith(fetch(e.request)); });';
-        var blob = new Blob([swCode], {type: 'application/javascript'});
-        var url = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(url);
-      });
+    function updateUI() {
+      accessToken = localStorage.getItem('access_token');
+      
+      if (accessToken) {
+        authSection.style.display = 'none';
+        userInfo.style.display = 'flex';
+        recordBtn.disabled = false;
+      } else {
+        authSection.style.display = 'block';
+        userInfo.style.display = 'none';
+        recordBtn.disabled = true;
+      }
     }
 
     recordBtn.addEventListener('click', function() {
@@ -479,39 +579,14 @@
       }
     });
 
-    function getAccessToken() {
-      statusDiv.textContent = 'Autentificerer...';
-      
-      var credentials = btoa(CORTI_CLIENT_ID + ':' + CORTI_CLIENT_SECRET);
-      
-      return fetch('https://auth.eu.corti.ai/oauth2/token', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Basic ' + credentials,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: 'grant_type=client_credentials&scope=api'
-      })
-      .then(function(response) {
-        if (!response.ok) {
-          throw new Error('Authentication fejlede: ' + response.statusText);
-        }
-        return response.json();
-      })
-      .then(function(data) {
-        return data.access_token;
-      });
-    }
-
-    function createInteraction(accessToken) {
+    function createInteraction() {
       statusDiv.textContent = 'Etablerer forbindelse...';
       
       return fetch('https://api.eu.corti.ai/dictation/v2/interactions', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + accessToken,
-          'Content-Type': 'application/json',
-          'X-Tenant-Name': CORTI_TENANT
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           language: 'da-DK',
@@ -520,22 +595,31 @@
       })
       .then(function(response) {
         if (!response.ok) {
-          throw new Error('Kunne ikke oprette session: ' + response.statusText);
+          if (response.status === 401) {
+            localStorage.removeItem('access_token');
+            updateUI();
+            throw new Error('Session udløbet - log venligst ind igen');
+          }
+          return response.text().then(function(text) {
+            throw new Error('Kunne ikke oprette session: ' + text);
+          });
         }
         return response.json();
       });
     }
 
     function startRecording() {
+      if (!accessToken) {
+        showAlert('Log venligst ind først', 'error');
+        return;
+      }
+      
       alertDiv.innerHTML = '';
       transcriptionDiv.innerHTML = '';
       qrCodeDiv.innerHTML = '';
       fullTranscription = '';
       
-      getAccessToken()
-        .then(function(token) {
-          return createInteraction(token);
-        })
+      createInteraction()
         .then(function(interaction) {
           return connectWebSocket(interaction.websocket_url);
         })
@@ -557,16 +641,14 @@
       websocket.onmessage = function(event) {
         var data = JSON.parse(event.data);
         
-        if (data.type === 'transcript') {
-          if (data.is_final) {
-            fullTranscription += data.text + ' ';
-            updateTranscription();
-          }
+        if (data.type === 'transcript' && data.is_final) {
+          fullTranscription += data.text + ' ';
+          updateTranscription();
         }
       };
       
-      websocket.onerror = function(error) {
-        showAlert('Forbindelsesfejl: Kunne ikke oprette forbindelse', 'error');
+      websocket.onerror = function() {
+        showAlert('Forbindelsesfejl', 'error');
         stopRecording();
       };
       
@@ -615,7 +697,9 @@
       })
       .catch(function(err) {
         showAlert('Mikrofon adgang nægtet: ' + err.message, 'error');
-        if (websocket) websocket.close();
+        if (websocket) {
+          websocket.close();
+        }
       });
     }
 
@@ -690,6 +774,9 @@
         correctLevel: QRCode.CorrectLevel.H
       });
     }
+
+    handleCallback();
+    updateUI();
   </script>
 </body>
 </html>
